@@ -4,7 +4,7 @@
         <ProjectVersion>20.1</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Application</AppType>
@@ -110,8 +110,8 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Keys>CompanyName=© Germán Estévez - Neftalí;FileDescription=Visualizador de Strings de Debug;FileVersion=1.1.0.225;InternalName=DebugStringView;LegalCopyright=© Germán Estévez - Neftalí;LegalTrademarks=© Germán Estévez - Neftalí;OriginalFilename=DebugStringView;ProgramID=com.embarcadero.DebugStringView;ProductName=DebugStringView;ProductVersion=1.1;Comments=Visualizador de strings de debug</VerInfo_Keys>
-        <VerInfo_Build>225</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=© Germán Estévez - Neftalí;FileDescription=Visualizador de Strings de Debug;FileVersion=1.1.0.226;InternalName=DebugStringView;LegalCopyright=© Germán Estévez - Neftalí;LegalTrademarks=© Germán Estévez - Neftalí;OriginalFilename=DebugStringView;ProgramID=com.embarcadero.DebugStringView;ProductName=DebugStringView;ProductVersion=1.1;Comments=Visualizador de strings de debug</VerInfo_Keys>
+        <VerInfo_Build>226</VerInfo_Build>
         <Icon_MainIcon>DebugStringView_Icon.ico</Icon_MainIcon>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
