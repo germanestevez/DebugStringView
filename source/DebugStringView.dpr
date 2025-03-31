@@ -1,0 +1,27 @@
+program DebugStringView;
+
+uses
+  Vcl.Forms,
+  FMain in 'FMain.pas' {FormMain},
+  uCaptureDebugString in 'uCaptureDebugString.pas',
+  uProcessInformation in 'uProcessInformation.pas',
+  uGridHelpers in 'uGridHelpers.pas',
+  uUtils in 'uUtils.pas',
+  uTypes in 'uTypes.pas',
+  uLog.Classes in 'uLog.Classes.pas',
+  uFile.Classes in 'uFile.Classes.pas',
+  uConfig.Classes in 'uConfig.Classes.pas',
+  FAcercaDe in 'FAcercaDe.pas' {FormAcercaDe},
+  uRecursos in 'uRecursos.pas',
+  uUpdates in 'uUpdates.pas';
+
+{$R *.res}
+{$R *.dkl_const.res}
+
+begin
+  Application.Initialize;
+  ReportMemoryLeaksOnShutdown := True;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFormMain, FormMain);
+  Application.Run;
+end.
