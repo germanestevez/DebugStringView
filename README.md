@@ -12,9 +12,9 @@ Puede usarla y modificarla líbremente.
 Además del código fuente la aplicación se distribuye en un fichero ZIP. No requiere instalación y basta con descomprimirla y ejecutarla.
 
 ## Código fuente
-El código fuente de la aplicación está disponible en este repositorio.
-Está compilada con [Embarcadero Delphi 12.3](https://www.embarcadero.com/es/products/delphi)
-Utiliza para el multiidioma [los componentes DKLang](https://github.com/yktoo/dklang.git)
+El código fuente de la aplicación está disponible en este repositorio.  
+Está compilada con [Embarcadero Delphi 12.3](https://www.embarcadero.com/es/products/delphi)  
+Utiliza para el multiidioma [los componentes DKLang](https://github.com/yktoo/dklang.git)  
 
 ## Características
  - Permite guardar el contenido de la captura en ficheros con extensión (*.dsvlog).
@@ -31,6 +31,8 @@ Utiliza para el multiidioma [los componentes DKLang](https://github.com/yktoo/dk
 ## Multiidioma
 La aplicación trabaja con múltiples idiomas, que además que cargan de forma dinámica. Se pueden incorporar más idiomas de forma fácil (y sin recompilar) y la aplicación los reconocerá y los incorporará al menú de forma automática una vez que se ejecute.
 La aplicación busca en la carpera “Languages” ficheros de idiomas.
+
+![multiidioma](https://neftali.clubdelphi.com/wp-content/uploads/web_multiidioma.png)
 
 ¿Quieres ayudar con una traducción?
 
