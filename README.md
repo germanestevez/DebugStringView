@@ -2,6 +2,8 @@
 ## Introducción
 Esta aplicación le permite monitorizar la salida de depuración en su sistema local. Mostrará aquellos mensajes que se generen utilizando la API de Windows OutputDebugString.
 
+![logo](https://neftali.clubdelphi.com/wp-content/uploads/Logo1b.png)
+
 ![pantalla principal](https://neftali.clubdelphi.com/wp-content/uploads/Captura_2025-03-26-08_50_49-1024x617.png)
 
 ## Licencia
@@ -36,6 +38,6 @@ La aplicación busca en la carpera “Languages” ficheros de idiomas.
 
 ![multiidioma](https://neftali.clubdelphi.com/wp-content/uploads/web_multiidioma.png)
 
-¿Quieres ayudar con una traducción?
+**¿Quieres ayudar con una traducción?**
 
 En la ayuda del programa están las instrucciones necesarias para generar nuevas traducciones. Si te animas, basta con descargar el fichero original de la traducción y una vez generada una nueva traducción la puedes añadir directamente al directorio de Languages incluido con la aplicación. Además, si me la envías la incluiré en la siguiente versión.
