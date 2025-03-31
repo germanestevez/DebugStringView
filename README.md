@@ -13,8 +13,8 @@ Además del código fuente la aplicación se distribuye en un fichero ZIP. No re
 
 ## Código fuente
 El código fuente de la aplicación está disponible en este repositorio.
-Está compilada con [Embarcadero Delphi 12.3]:https://www.embarcadero.com/es/products/delphi
-Utiliza para el multiidioma [los componentes DKLang]:https://github.com/yktoo/dklang.git
+Está compilada con [Embarcadero Delphi 12.3](https://www.embarcadero.com/es/products/delphi)
+Utiliza para el multiidioma [los componentes DKLang](https://github.com/yktoo/dklang.git)
 
 ## Características
  - Permite guardar el contenido de la captura en ficheros con extensión (*.dsvlog).
