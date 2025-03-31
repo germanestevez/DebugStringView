@@ -1,6 +1,6 @@
 # DebugStringView
 
-<center>![logo](https://neftali.clubdelphi.com/wp-content/uploads/Logo1b.png)</center>
+![logo](https://neftali.clubdelphi.com/wp-content/uploads/Logo1b.png){: .align-center}
 
 ## Introducción
 Esta aplicación le permite monitorizar la salida de depuración en su sistema local. Mostrará aquellos mensajes que se generen utilizando la API de Windows OutputDebugString.
