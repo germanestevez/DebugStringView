@@ -10,6 +10,8 @@ Puede usarla y modificarla líbremente.
 
 ## Ejecución
 Además del código fuente la aplicación se distribuye en un fichero ZIP. No requiere instalación y basta con descomprimirla y ejecutarla.
+Se puede descargar la versión compilada (fichero ZIP que incluye la verión de 32 y 64 bits) [desde la web de la aplicación](https://neftali.clubdelphi.com/debugstringview/).
+[https://neftali.clubdelphi.com/debugstringview/](https://neftali.clubdelphi.com/debugstringview/)
 
 ## Código fuente
 El código fuente de la aplicación está disponible en este repositorio.  
