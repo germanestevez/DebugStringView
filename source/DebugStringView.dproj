@@ -76,22 +76,30 @@
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=© Germán Estévez - Neftalí;FileDescription=Visualizador de Strings de Debug;FileVersion=1.1.0.227;InternalName=DebugStringView;LegalCopyright=© Germán Estévez - Neftalí;LegalTrademarks=© Germán Estévez - Neftalí;OriginalFilename=DebugStringView;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=DebugStringView;ProductVersion=1.1;Comments=Visualizador de Strings de Debug</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <DCC_UnitSearchPath>c:\ProyectosDelphi\DebugStringView\Extra\dklang_main\Src\;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <Icon_MainIcon>..\..\DebugStringView\source\DebugStringView_Icon.ico</Icon_MainIcon>
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
+        <VerInfo_Build>227</VerInfo_Build>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <DCC_UsePackage>vclwinx;DataSnapServer;fmx;emshosting;vclie;DbxCommonDriver;bindengine;IndyIPCommon;VCLRESTComponents;DBXMSSQLDriver;FireDACCommonODBC;emsclient;FireDACCommonDriver;appanalytics;IndyProtocols;vclx;IndyIPClient;dbxcds;vcledge;bindcompvclwinx;FmxTeeUI;emsedge;bindcompfmx;DBXFirebirdDriver;inetdb;vclribbon;FireDACSqliteDriver;DbxClientDriver;FireDACASADriver;Tee;soapmidas;vclactnband;TeeUI;fmxFireDAC;dbexpress;FireDACInfxDriver;DBXMySQLDriver;VclSmp;inet;DataSnapCommon;vcltouch;fmxase;DBXOdbcDriver;dbrtl;FireDACDBXDriver;FireDACOracleDriver;fmxdae;TeeDB;FireDACMSAccDriver;CustomIPTransport;FireDACMSSQLDriver;DataSnapIndy10ServerTransport;DataSnapConnectors;vcldsnap;DBXInterBaseDriver;FireDACMongoDBDriver;IndySystem;FireDACTDataDriver;Skia.Package.VCL;vcldb;vclFireDAC;bindcomp;FireDACCommon;DataSnapServerMidas;FireDACODBCDriver;emsserverresource;IndyCore;RESTBackendComponents;bindcompdbx;rtl;FireDACMySQLDriver;FireDACADSDriver;RESTComponents;DBXSqliteDriver;vcl;IndyIPServer;dsnapxml;dsnapcon;DataSnapClient;DataSnapProviderClient;adortl;DBXSybaseASEDriver;DBXDb2Driver;vclimg;DataSnapFireDAC;emsclientfiredac;FireDACPgDriver;FireDAC;FireDACDSDriver;inetdbxpress;xmlrtl;tethering;bindcompvcl;dsnap;CloudService;DBXSybaseASADriver;DBXOracleDriver;FireDACDb2Driver;DBXInformixDriver;fmxobj;bindcompvclsmp;DataSnapNativeClient;FMXTee;DatasnapConnectorsFreePascal;soaprtl;soapserver;FireDACIBDriver;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=© Germán Estévez - Neftalí;FileDescription=Visualizador de Strings de Debug;FileVersion=1.1.0.227;InternalName=DebugStringView;LegalCopyright=© Germán Estévez - Neftalí;LegalTrademarks=© Germán Estévez - Neftalí;OriginalFilename=DebugStringView;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=Visualizador de Strings de Debug</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <DCC_UnitSearchPath>c:\ProyectosDelphi\DebugStringView\Extra\dklang_main\Src\;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <Icon_MainIcon>..\..\DebugStringView\source\DebugStringView_Icon.ico</Icon_MainIcon>
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_Build>227</VerInfo_Build>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
@@ -110,8 +118,8 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Keys>CompanyName=© Germán Estévez - Neftalí;FileDescription=Visualizador de Strings de Debug;FileVersion=1.1.0.226;InternalName=DebugStringView;LegalCopyright=© Germán Estévez - Neftalí;LegalTrademarks=© Germán Estévez - Neftalí;OriginalFilename=DebugStringView;ProgramID=com.embarcadero.DebugStringView;ProductName=DebugStringView;ProductVersion=1.1;Comments=Visualizador de strings de debug</VerInfo_Keys>
-        <VerInfo_Build>226</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=© Germán Estévez - Neftalí;FileDescription=Visualizador de Strings de Debug;FileVersion=1.1.0.227;InternalName=DebugStringView;LegalCopyright=© Germán Estévez - Neftalí;LegalTrademarks=© Germán Estévez - Neftalí;OriginalFilename=DebugStringView;ProgramID=com.embarcadero.DebugStringView;ProductName=DebugStringView;ProductVersion=1.1;Comments=Visualizador de strings de debug</VerInfo_Keys>
+        <VerInfo_Build>227</VerInfo_Build>
         <Icon_MainIcon>DebugStringView_Icon.ico</Icon_MainIcon>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
@@ -129,9 +137,13 @@
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Build>230</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=© Germán Estévez - Neftalí;FileDescription=Visualizador de Strings de Debug;FileVersion=1.1.0.230;InternalName=DebugStringView;LegalCopyright=© Germán Estévez - Neftalí;LegalTrademarks=© Germán Estévez - Neftalí;OriginalFilename=DebugStringView;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=DebugStringView;ProductVersion=1.1;Comments=Visualizador de Strings de Debug</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <VerInfo_Build>229</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=© Germán Estévez - Neftalí;FileDescription=Visualizador de Strings de Debug;FileVersion=1.1.0.229;InternalName=DebugStringView;LegalCopyright=© Germán Estévez - Neftalí;LegalTrademarks=© Germán Estévez - Neftalí;OriginalFilename=DebugStringView;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=Visualizador de Strings de Debug</VerInfo_Keys>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
