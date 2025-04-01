@@ -37,26 +37,24 @@ type
     // FProcessId: Word;
     FProcessName: string;
     FCreationDate: TDateTime;
-    FHandle: THandle;
     FProcessIdList: TIdList;
     FColor: TColor;
     FLog: ILog;
     /// <summary> Añadir un nuevo  proceso a partir desummary; Si ya existe lo ignora </sumary>
     procedure AddProcessId(const aProcessId: DWORD);
   public
-//aaaaaaaaaaaaaaaaaaaaa
-
-  public
     constructor Create(const aProcessName:string; const aProcessId:DWORD; aLog:ILog=nil);
     destructor Destroy; override;
     procedure Debug;
-
     // Lista de ID's de todos los procesos con el mismo nombre
     property ProcessIdList:TIdList read FProcessIdList;
-    property Handle:THandle read FHandle {write FHandle};
-    property ProcessName:string read FProcessName {write FProcessName};
-    property CreationDate:TDateTime read FCreationDate {write FCreationDate};
+    /// <summary> Nombre de la aplicación asociada a un ProcessId </summary>
+    property ProcessName:string read FProcessName;
+    /// <summary> Fecha de creacion (aplicación asociada a un ProcessId) </summary>
+    property CreationDate:TDateTime read FCreationDate;
+    /// <summary> Color asociado a un proceso </summary>
     property Color:TColor read FColor write FColor;
+    /// <summary> propiedad para implementar posibilidad de Log es este objeto </summary>
     property Log:ILog read FLog write FLog;
   end;
 
@@ -86,7 +84,6 @@ begin
   FColor := TColorUtils.ConvertirAPastel(TColorUtils.GenerarColorAleatorio, 1.5);
   FProcessIdList := TIdList.Create;
   AddProcessId(aProcessId);
-  // SetProcessId(aProcessId);
 end;
 
 procedure TProcessInfo.Debug;
