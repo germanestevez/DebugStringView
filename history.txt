@@ -1,0 +1,27 @@
+1.4 (febrero 2026)
+--------------------------
+* Gestión de bookmarks
+* Grabación y carga de ficheros desde disco
+* Opciones de verisonado
+* Generar una nueva captura desde cero
+* Limpiar mensajes de la consola de forma selectiva
+* mejora del interfaz; botones y se amplían los menús
+* Opciones de búsqueda en los mensajes
+* Opcines de navegación por los mensajes
+* Corrección de errores menores
+
+
+
+1.3 (Abrirl 2025)
+------------------------
+* Opciones de búsqueda de texto dentro de los mensajes (ProcessId, ProcessName, Mensaje)
+* Opción de Ir a... (por ID)
+* Permite mostrar/ocultar la toolbar
+* Gestión de bookmarks; Creación y navegación rápida (panel)
+* Mejor gestión de nuevas actualizaciones
+* Se asigna la extnsión .dsvlog a la aplicación DebugStringView.
+* Icono para los ficheros de extensión asociada (*.dsvlog)
+
+1.2 (Marzo 2025)
+------------------------
+* Primera versión de la aplicación
