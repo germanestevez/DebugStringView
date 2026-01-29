@@ -12,7 +12,8 @@ uses
   FireDAC.Comp.Client,
   uProcessInformation, uTypes, uCaptureDebugString, uLog.Classes, uConfig.Classes, VCL.ExtDlgs,
   uFile.Classes, Vcl.Buttons,
-  uRecursos, Vcl.Imaging.pngimage, Vcl.ToolWin, DKLangStorage;
+  uRecursos, Vcl.Imaging.pngimage, Vcl.ToolWin, DKLangStorage,
+  uBookmarks.Classes, Vcl.StdActns;
 
 type
   TFormMain = class(TForm)
@@ -143,6 +144,55 @@ type
     ToolButton10: TToolButton;
     ToolButton17: TToolButton;
     ToolButton18: TToolButton;
+    actVerToolbar: TAction;
+    VerToolbar1: TMenuItem;
+    actBMNuevo: TAction;
+    actBMAnterior: TAction;
+    actBMSiguiente: TAction;
+    actBMEliminar: TAction;
+    pmGrid: TPopupMenu;
+    Limpiardebug2: TMenuItem;
+    N5: TMenuItem;
+    Coloresporproceso1: TMenuItem;
+    N6: TMenuItem;
+    Bookmarks1: TMenuItem;
+    Nuevo1: TMenuItem;
+    Siguiente1: TMenuItem;
+    Anterior1: TMenuItem;
+    Eliminar1: TMenuItem;
+    mtMensajesBM: TIntegerField;
+    pnlBookmarks: TPanel;
+    lblBookmarks: TLabel;
+    lbBookmarks: TListBox;
+    FindDialog: TFindDialog;
+    Bsqueda1: TMenuItem;
+    actBuscar: TAction;
+    actIrA: TAction;
+    SearchFind1: TSearchFind;
+    SearchFindNext1: TSearchFindNext;
+    SearchFindFirst1: TSearchFindFirst;
+    Buscar1: TMenuItem;
+    N8: TMenuItem;
+    IraID1: TMenuItem;
+    ToolButton19: TToolButton;
+    ToolButton20: TToolButton;
+    ToolButton21: TToolButton;
+    pmBookmarks: TPopupMenu;
+    Eliminar2: TMenuItem;
+    N7: TMenuItem;
+    actCopiarMensaje: TAction;
+    actCopiarLinea: TAction;
+    Copiarmensaje1: TMenuItem;
+    Copiarlneacompleta1: TMenuItem;
+    pmProcesos: TPopupMenu;
+    actLimpiarProcesoLista: TAction;
+    Eliminar3: TMenuItem;
+    btnLimpiarProceso: TButton;
+    actNuevo: TAction;
+    ToolButton22: TToolButton;
+    Limpiaresteproceso1: TMenuItem;
+    actLimpiarProcesoGrid: TAction;
+    Nuevacaptura1: TMenuItem;
     procedure FormShow(Sender: TObject);
     procedure actSalirExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -182,15 +232,48 @@ type
     procedure pnlUpdateClick(Sender: TObject);
     procedure actAyudaExecute(Sender: TObject);
     procedure imgCloseClick(Sender: TObject);
+    procedure actVerToolbarExecute(Sender: TObject);
+    procedure actBMNuevoExecute(Sender: TObject);
+    procedure lbBookmarksClick(Sender: TObject);
+    procedure actBuscarExecute(Sender: TObject);
+    procedure FindDialogFind(Sender: TObject);
+    procedure FindDialogClose(Sender: TObject);
+    procedure FindDialogShow(Sender: TObject);
+    procedure actIrAExecute(Sender: TObject);
+    procedure actPausarUpdate(Sender: TObject);
+    procedure actReanudarUpdate(Sender: TObject);
+    procedure actGuardarUpdate(Sender: TObject);
+    procedure pmGridPopup(Sender: TObject);
+    procedure pmGridClose(Sender: TObject);
+    procedure actGuardarcomoUpdate(Sender: TObject);
+    procedure actLimpiarUpdate(Sender: TObject);
+    procedure actCopiarMensajeExecute(Sender: TObject);
+    procedure actCopiarLineaExecute(Sender: TObject);
+    procedure actBMEliminarExecute(Sender: TObject);
+    procedure actBMEliminarUpdate(Sender: TObject);
+    procedure actBMNuevoUpdate(Sender: TObject);
+    procedure actLimpiarProcesoListaExecute(Sender: TObject);
+    procedure actLimpiarProcesoListaUpdate(Sender: TObject);
+    procedure actBMAnteriorUpdate(Sender: TObject);
+    procedure actBMSiguienteUpdate(Sender: TObject);
+    procedure actBMAnteriorExecute(Sender: TObject);
+    procedure actBMSiguienteExecute(Sender: TObject);
+    procedure clbListaProcesosContextPopup(Sender: TObject; MousePos: TPoint;  var Handled: Boolean);
+    procedure actNuevoExecute(Sender: TObject);
+    procedure actLimpiarProcesoGridExecute(Sender: TObject);
+    procedure actLimpiarProcesoGridUpdate(Sender: TObject);
 
   private
+    EstadoActualPausado:boolean;
     MsgIndex:integer;
     thCapture: TDebugStringThread;
-    FPausado: boolean;
     FLog:ILog;
-    FSave:ISaveDSToFile;
+    FSave, FOpen:ISaveLoadDSToFile;
     FConfig:IConfig;
     FSavedFileName: TFileName;
+    FFicheroCargado: boolean;
+    FListaBookmarks: TBookmarkListDSV;
+    FGlobalStates: TGlobalStates;
 
     // ayudas ******************************************************************
     function GetHelpFileName:TFileName;
@@ -198,6 +281,8 @@ type
     // Menú de fichero *********************************************************
     // Grabar el fichero
     procedure InternalSaveFile(aFileName:TFileName);
+    // Abrir un fichero de disco
+    procedure InternalOpenFile;
     // fichero de configuración
     function GetConfigFileName:TFileName;
 
@@ -210,9 +295,12 @@ type
     procedure IniData;
 
     // Actualizar en ejecución partes del programa *****************************
-    procedure UpdateProcessList(const aProcessId:integer);
+    procedure UpdateProcessList(const aProcessId:integer; const pName:string); overload;
+    procedure UpdateProcessList(const aProcessId: integer); overload;
     procedure UpdateStatusBar;
     procedure UpdateCaption;
+    procedure UpdateBookMarksList;
+    procedure InternalUpdateProcessCheckList(const aProcessName:string);
 
     // Configuracion ***********************************************************
     procedure RestoreConfiguration;
@@ -229,6 +317,7 @@ type
     function GetColorPorProceso: boolean;
     // actualiza la lista de IDs de un proceso
     procedure InternalUpdateProcessIdList(const aProcessName:string);
+    procedure LimpiarProceso(const aProcessName:string);
 
     // Visualización de mensajes ***********************************************
     procedure MostrarOcultarColumna(Sender: TObject; aFieldName:string);
@@ -238,13 +327,26 @@ type
     procedure SetPausado(const Value: boolean);
     // Procedimiento para mostrar losmensajes que llegan desde debug
     procedure ProcSharedInfo(const aProcessId:Word; const aMensaje:string);
+    // Añadir un proceso nuevo, cuando viene de la carga de un fichero...
+    procedure AddProcessFromFile(const aProcessId:Word; const aProcessName, aMensaje: string; const aBookmark:integer=-1);
+    function GetPausado: boolean;
+
+    // permiten grabar/leer la lista de bookmarks al final del fichero (informacion extendida)
+    procedure SaveBookmarks(TS:TStrings);
+    procedure LoadBookmarks(TS:TStrings; const AIndex:integer);
   public
     /// <summary> Si la captura de mensajes está pausada o no </summary>
-    property Pausado:boolean read FPausado write SetPausado default False;
+    property Pausado:boolean read GetPausado write SetPausado default False;
+    /// <summary> Marcamos el flag de que hemos abierto un fichero </summary>
+    property FicheroCargado:boolean read FFicheroCargado write FFicheroCargado default False;
+    // limpiar datos de un proceso
+    procedure DoLimpiarProceso(const aProcessName:string);
     /// <summary> Nombre del fichero (si ya se ha guardado) </summary>
     property SavedFileName:TFileName read FSavedFileName write FSavedFileName;
     /// <summary> Si tenemos activado la coloracion por proceso </summary>
     property ColorPorProceso:boolean read GetColorPorProceso;
+    /// <summary> Lista de boormarks creados </summary>
+    property ListaBookmarks:TBookmarkListDSV read FListaBookmarks;
   end;
 
 var
@@ -261,8 +363,10 @@ implementation
 {$R *.dfm}
 
 uses
+  FSplash,
+  System.Generics.Collections,
   System.StrUtils, System.UITypes, FAcercaDe, ShellAPI, System.IOUtils,
-  uUtils, uGridHelpers, uUpdates;
+  uUtils, uGridHelpers, uUpdates, Clipbrd;
 
 procedure TFormMain.Log(const aMensaje:string);
 begin
@@ -274,13 +378,18 @@ end;
  
 procedure TFormMain.actAbrirExecute(Sender: TObject);
 begin
+  // Pasos previos
+  // Avisar al usuario si hay cosas en pantalla que se van a perder
+  if (MessageBox(0, PChar(DKLangConstW('msgOpenFile1') + sLineBreak + DKLangConstW('msgOpenFile2')), PChar(DKLangConstW('msgTitleOpen')), MB_ICONEXCLAMATION or MB_YESNO) = idNo) then
+    Exit;
+
+  // Desactivar acciones (captura, save,...)
+  FGlobalStates := FGlobalStates + [gsFileLoaded, gsPaused];
+
   // Abrir un fichero de disco
-
-  // Desactivar la capotura de mensajes
-
-  // Rellenar procesos
-
-
+  InternalOpenFile;
+  // Nombre del fichero en el caption
+  UpdateCaption;
 end;
 
 procedure TFormMain.actAcercaDeExecute(Sender: TObject);
@@ -301,11 +410,6 @@ begin
     // Opcion 1: mensaje
     pnlUpdate.Visible := True;
     lblNewVersion.Caption := Format(DKLangConstW('msgNewVersion'), [TBaseUpdateSearch(upd).VersionDescargada]);
-    {
-    // Opcion 2: pregunta al usuario
-    if (MessageBox(0, PChar(Format(msg_Updates,[upd.GetVersionDescargada])), PChar(msgUpdatesTitle), MB_ICONINFORMATION or MB_YESNO) = idYes) then
-      TBaseUpdateSearch(upd).OpenUpdateWeb;
-    }
   end
   else begin
     // Si se ha llamadoexprésamente, sacamos mensaje
@@ -324,15 +428,216 @@ begin
     ShellExecute(HInstance, 'open', PChar(fName), nil, nil, SW_NORMAL);
 end;
 
+procedure TFormMain.actBMAnteriorExecute(Sender: TObject);
+begin
+  // pendiente
+end;
+
+procedure TFormMain.actBMAnteriorUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := (mtMensajes.Active) and (lbBookmarks.ItemIndex > 1);
+end;
+
+procedure TFormMain.actBMEliminarExecute(Sender: TObject);
+begin
+  // preguntar
+  if (MessageBox(0, PChar(DKLangConstW('msgEliminarBM1')), PChar(DKLangConstW('msgEliminarBM2')), MB_ICONQUESTION or MB_YESNO) = idNo) then
+    Exit;
+
+  if (not mtMensajes.Active) then
+    Exit;
+
+  FGlobalStates := FGlobalStates + [gsBookmark];
+  try
+    // eliminarlo de la BD
+    // 1) Guardar posicion actual
+    var bm:TBookmark := mtMensajes.GetBookmark;
+
+    mtMensajes.DisableControls;
+    try
+      // 2) Ir al que quiero borrar
+      var index := lbBookmarks.ItemIndex;
+      if (index < 0) then
+        Exit;
+
+      var str := lbBookmarks.Items[index];
+      str := Trim(Copy(str, 1, 3));
+      var numero := StrToIntDef(str, -1);
+
+      if (index = -1) then
+        raise Exception.Create(DKLangConstW('errBMNotFound'));
+
+      var actual := ListaBookmarks.GetByNumero(numero);
+      if not Assigned(actual) then
+        Exit;
+
+      try
+        mtMensajes.GotoBookmark(actual);
+      except
+        on E:Exception do begin
+          MessageDlg(DKLangConstW('errBMNotFound1') + sLineBreak + DKLangConstW('errBMNotFound2'), mtError, [mbOK], 0);
+        end;
+      end;
+
+      // 3) Borrarlo
+      mtMensajes.Edit;
+      mtMensajesBM.Clear;
+      mtMensajes.Post;
+
+      // 4) Eliminar de la lista interna
+      ListaBookmarks.DeleteByNumero(numero);
+
+      // 5) Volver a la posicion guardada
+      mtMensajes.GotoBookmark(bm);
+    finally
+      mtMensajes.EnableControls;
+    end;
+
+    // Actualizar la lista
+    UpdateBookMarksList;
+  finally
+    FGlobalStates := FGlobalStates - [gsBookmark];
+  end;
+end;
+
+procedure TFormMain.actBMEliminarUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := (mtMensajes.Active) and (lbBookmarks.ItemIndex <> -1);
+end;
+
+procedure TFormMain.actBMNuevoExecute(Sender: TObject);
+var
+  str:string;
+begin
+  if not mtMensajes.Active then
+    Exit;
+
+  FGlobalStates := FGlobalStates + [gsBookmark];
+  try
+    var varID := mtMensajesID.AsInteger;
+    var bm := mtMensajes.GetBookmark;
+
+    var b := InputQuery(DKLangConstW('msgCrearbm'), DKLangConstW('msgDesc1'), str);
+    if not b then
+      Exit;
+    // Añadirlo
+    var i:integer := ListaBookmarks.Count + 1;
+    ListaBookmarks.Add(i, varID, str, bm);
+
+    // Añadirlo al Dataset
+    mtMensajes.Edit;
+    mtMensajesBM.AsInteger := i;
+    mtMensajes.Post;
+
+    UpdateBookMarksList;
+  finally
+    FGlobalStates := FGlobalStates - [gsBookmark];
+  end;
+end;
+
+procedure TFormMain.actBMNuevoUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := (mtMensajes.Active) {and (lbBookmarks.ItemIndex <> -1)};
+end;
+
+procedure TFormMain.actBMSiguienteExecute(Sender: TObject);
+begin
+// pendiente
+end;
+
+procedure TFormMain.actBMSiguienteUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := (mtMensajes.Active) and (lbBookmarks.ItemIndex >= 0) and (lbBookmarks.Count > lbBookmarks.ItemIndex+1);
+end;
+
 procedure TFormMain.actBuscarActIniciarExecute(Sender: TObject);
 begin
   // Usa un timer
+end;
+
+procedure TFormMain.actBuscarExecute(Sender: TObject);
+begin
+  var b := FindDialog.Execute;
+  if not b then
+    Exit;
 end;
 
 procedure TFormMain.actColorProcesoExecute(Sender: TObject);
 begin
   // colorear por prpoceso
   dbgMensajes.Invalidate;
+end;
+
+procedure TFormMain.actCopiarLineaExecute(Sender: TObject);
+begin
+  // copiar la línea completa al portapapeles
+  if mtMensajes.Active then
+    if not mtMensajes.IsEmpty then
+      Clipboard.AsText := mtMensajesID.AsString + ' ' +
+                          mtMensajesFecha.AsString + ' ' +
+                          mtMensajesHora.AsString + ' ' +
+                          mtMensajesProcessId.AsString + ' ' +
+                          mtMensajesNombre.AsString + ' ' +
+                          mtMensajesMensaje.AsString;
+end;
+
+procedure TFormMain.actCopiarMensajeExecute(Sender: TObject);
+begin
+  // copiar el mensaje al portapapeles
+  if mtMensajes.Active then
+    if not mtMensajes.IsEmpty then
+      Clipboard.AsText := mtMensajesMensaje.AsString;
+end;
+
+procedure TFormMain.InternalOpenFile;
+begin
+  var progress := TProcessProgress.Create(pbProceso, sbMain, 4);
+  try
+    var b := FileOpenDialog.Execute;
+    if not b then begin
+      Log('Lectura del fichero cancelada');
+      Exit;
+    end;
+
+    // Limpiar elcontenido actual
+    actLimpiarExecute(nil);
+    // inicializar indice y dataset
+    IniData;
+
+    try
+      // generar el objeto lectura
+      if not Assigned(FOpen) then
+        FOpen := TFactoryLoad.GetClass(TLoadDSFromFile);
+      progress.Ini;
+      TLoadDSFromFile(FOpen).OnProgress := progress.Step;
+      TLoadDSFromFile(FOpen).LoadExtendedInfo := LoadBookmarks;
+
+      Log('Se va a leer en el fichero: ' + FileOpenDialog.FileName);
+
+      FOpen.SetLog(FLog);
+      FOpen.SetDataset(mtMensajes);
+      TLoadDSFromFile(FOpen).OnAddItem := AddProcessFromFile;
+      FOpen.Open(FileOpenDialog.FileName);
+
+      // Una vez cargado nos quedamos con el nombre del fichero
+      FSavedFileName := FileOpenDialog.FileName;
+
+      // Rellenar el proceso...
+
+      // Marcamos el flag de que hemos abierto un fichero
+      FFicheroCargado := True;
+
+    except
+      on E:Exception do begin
+        Log(DKLangConstW('err_leerFichero') + E.Message);
+        raise Exception.Create(DKLangConstW('err_leerFichero') + sLineBreak + E.Message);
+      end;
+    end;
+
+  finally
+    progress.Fin;
+    FreeAndNil(progress);
+  end;
 end;
 
 procedure TFormMain.InternalSaveFile(aFileName:TFileName);
@@ -345,6 +650,8 @@ begin
       FSave := TFactorySave.GetClass(TSaveDSToFIle);
     progress.Ini;
     TSaveDSToFile(FSave).OnProgress := progress.Step;
+    TSaveDSToFile(FSave).Version := GetAppVersion(ParamStr(0));
+    TSaveDSToFile(FSave).SaveExtendedInfo := SaveBookmarks;
 
     try
       // Nombre del fichero
@@ -388,10 +695,20 @@ begin
   UpdateCaption;
 end;
 
+procedure TFormMain.actGuardarcomoUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := not (gsFileLoaded in FGlobalStates);
+end;
+
 procedure TFormMain.actGuardarExecute(Sender: TObject);
 begin
   InternalSaveFile(FSavedFileName);
   UpdateCaption;
+end;
+
+procedure TFormMain.actGuardarUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := not (gsFileLoaded in FGlobalStates);
 end;
 
 procedure TFormMain.MostrarOcultarColumna(Sender: TObject; aFieldName:string);
@@ -400,6 +717,16 @@ begin
   if Assigned(col) then
     col.Visible := TAction(Sender).Checked;
   TGridHelper.AutoajustarAnchoColumna(dbgMensajes, 'Mensaje');
+end;
+
+procedure TFormMain.pmGridClose(Sender: TObject);
+begin
+  FGlobalStates := FGlobalStates - [gsPopupMenu];
+end;
+
+procedure TFormMain.pmGridPopup(Sender: TObject);
+begin
+  FGlobalStates := FGlobalStates + [gsPopupMenu];
 end;
 
 procedure TFormMain.pnlUpdateClick(Sender: TObject);
@@ -426,16 +753,122 @@ begin
   MostrarOcultarColumna(Sender, 'ID');
 end;
 
+procedure TFormMain.actIrAExecute(Sender: TObject);
+var
+  str:string;
+  b:boolean;
+begin
+  b := False;
+  EstadoActualPausado := Pausado;
+  Pausado := True;
+  try
+    // ir a una deterinada línea
+    b := InputQuery(DKLangConstW('msgIrACaption'), DKLangConstW('msgIrAMsg'), str);
+    if not b then
+      Exit;
+    // Añadirlo
+    var i:integer := StrToIntDef(str, -1);
+
+    if (i = -1) then
+      Exit;
+
+    // Ir a ese elemento (si lo encuentra)
+    var sBusqueda: string := '(ID=' + i.ToString + ')';
+
+    mtMensajes.First;
+    b := mtMensajes.LocateEx(sBusqueda,  [lxoCaseInsensitive, lxoCaseInsensitive, lxoFromCurrent]);
+
+    if (not b) then
+      sbMain.Panels[0].Text := DKLangConstW('msg_NoEncontrado');
+
+  finally
+    // si lo ha encontrado lo dejamos pausado
+    if (not b) then
+      Pausado := EstadoActualPausado;
+  end;
+end;
+
 procedure TFormMain.actLimpiarExecute(Sender: TObject);
 begin
+  // inicializar contadores
+  MsgIndex := 0;
   // limpiar los mensajes actuales
   mtMensajes.EmptyDataSet;
   // Limpiar la lista de procesos
   ListaProcesos.Clear;
-  // Limpiar el componente de lista de procesos
+  // Limpiar la lista de bookmarks
+  ListaBookmarks.Clear;
+  UpdateBookMarksList;
+  // Actualizar las listas en pantalla
   clbListaProcesos.Clear;
   // Limpiar el filtro si lo hay
   FilterMessagesByProcesses;
+end;
+
+procedure TFormMain.actLimpiarProcesoGridExecute(Sender: TObject);
+begin
+  // Pause
+  FGlobalStates := FGlobalStates + [gsPaused];
+  try
+    // Limpiar datos del proceso
+    var procName := mtMensajesNombre.AsString;
+    // (1) Limpiar los mensajes
+    DoLimpiarProceso(ProcName);
+    // restaurar si había filtro activado
+    FilterMessagesByProcesses;
+  finally
+    FGlobalStates := FGlobalStates - [gsPaused]
+  end;
+end;
+
+procedure TFormMain.actLimpiarProcesoGridUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := (not (gsFileLoaded in FGlobalStates)) and (mtMensajes.Active);
+end;
+
+procedure TFormMain.actLimpiarProcesoListaExecute(Sender: TObject);
+begin
+  // Pause
+  FGlobalStates := FGlobalStates + [gsPaused];
+  try
+    // Limpiar datos del proceso
+    var procName := clbListaProcesos.Items[clbListaProcesos.ItemIndex];
+    // (1) Limpiar los mensajes
+    DoLimpiarProceso(ProcName);
+    // restaurar si había filtro activado
+    FilterMessagesByProcesses;
+  finally
+    FGlobalStates := FGlobalStates - [gsPaused]
+  end;
+end;
+
+
+procedure TFormMain.DoLimpiarProceso(const aProcessName:string);
+begin
+  // (1) Borrar las entradas
+  LimpiarProceso(aProcessName);
+  var index := ListaProcesos.GetIndexByName(aProcessName);
+  // (2) Borrarlo de la lista
+  if (index <> -1) then
+    ListaProcesos.Delete(index);
+  // (3) Buscarlo en la lista de procesos y eliminarlo
+  index := clbListaProcesos.Items.IndexOf(aProcessName);
+  if (index <> -1) then
+    clbListaProcesos.Items.Delete(Index);
+end;
+
+
+procedure TFormMain.actLimpiarProcesoListaUpdate(Sender: TObject);
+begin
+  // si no hay nada seleccionado o no hay nada en la lista (deshabilitar)
+  TAction(Sender).Enabled := (clbListaProcesos.Items.Count > 0) and (clbListaProcesos.ItemIndex <> -1);
+  if (btnLimpiarProceso.Caption <> string.Empty) then
+    btnLimpiarProceso.Caption := string.Empty;
+end;
+
+procedure TFormMain.actLimpiarUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := (not (gsFileLoaded in FGlobalStates)) and (mtMensajes.Active);
 end;
 
 procedure TFormMain.actListaProcesosExecute(Sender: TObject);
@@ -448,16 +881,54 @@ begin
   TGridHelper.AutoajustarAnchoColumna(dbgMensajes, 'Mensaje');
 end;
 
+procedure TFormMain.actNuevoExecute(Sender: TObject);
+begin
+  // Preguntar al usuario si quiere continuar
+  if (MessageBox(0, PChar(DKLangConstW('msgNuevo1') + sLineBreak + DKLangConstW('msgNuevo2')), PChar(DKLangConstW('msgTitleNuevo')), MB_ICONQUESTION or MB_YESNO) = idNo) then
+    Exit;
+
+  // Limpiar todo, borar todo y empezar de nuevo
+  actLimpiar.Execute;
+  IniData;
+end;
+
 procedure TFormMain.actPausarExecute(Sender: TObject);
 begin
   // Pausar la captura
   Pausado := True;
 end;
 
+procedure TFormMain.actPausarUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := (not (gsFileLoaded in FGlobalStates)) and
+                             (not Pausado);
+end;
+
 procedure TFormMain.actReanudarExecute(Sender: TObject);
 begin
+
+  // estamos con un fichero abierto de disco?
+  if (gsFileLoaded in FGlobalStates) then begin
+    // Avisar al usuario de que lo que hay en pantalla se borrará
+    if (MessageBox(0, PChar(DKLangConstW('msgReanudar1') + sLineBreak + DKLangConstW('msgReanudar2')), PChar(DKLangConstW('msgTitleReanudar')), MB_ICONEXCLAMATION or MB_YESNO) = idNo) then
+      Exit;
+
+    // Limpiar los mensajes y renicializar todo
+    actLimpiarExecute(nil);
+    FSavedFileName := string.Empty;
+    FGlobalStates := FGlobalStates - [gsFileLoaded];
+
+    // actualizar el titulo
+    UpdateCaption;
+  end;
+
   // reanudar la captura
   Pausado := False
+end;
+
+procedure TFormMain.actReanudarUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := (gsFileLoaded in FGlobalStates) or (Pausado);
 end;
 
 procedure TFormMain.actSalirExecute(Sender: TObject);
@@ -470,6 +941,32 @@ begin
   // Invert selection
   TListboxUtils.ChangeSelection(clbListaProcesos, TSelType.stInvert);
   FilterMessagesByProcesses;
+end;
+
+procedure TFormMain.lbBookmarksClick(Sender: TObject);
+begin
+  // max. 99 bookmarks
+  if ListaBookmarks.Count = 99 then
+    raise Exception.Create(DKLangConstW('errLimiteBookmarks'));
+  var index := TListBox(Sender).ItemIndex;
+  if (index < 0) then
+    Exit;
+
+  var str := TListBox(Sender).Items[index];
+  str := Trim(Copy(str, 1, 3));
+  var numero := StrToIntDef(str, -1);
+
+  if (numero = -1) then
+    raise Exception.Create(DKLangConstW('errBMNotFound'));
+
+  var bm := ListaBookmarks.GetByNumero(Numero);
+  try
+    mtMensajes.GotoBookmark(bm);
+  except
+    on E:Exception do begin
+      MessageDlg(DKLangConstW('errBMNotFound1') + sLineBreak + DKLangConstW('errBMNotFound2'), mtError, [mbOK], 0);
+    end;
+  end;
 end;
 
 procedure TFormMain.lblListaProcesosDblClick(Sender: TObject);
@@ -501,9 +998,32 @@ begin
   TAction(Sender).Enabled := HayFiltroActivo;
 end;
 
+procedure TFormMain.actVerToolbarExecute(Sender: TObject);
+begin
+  // ver/ocultar toolbar
+  tbMain.Visible := actVerToolbar.Checked;
+end;
+
 procedure TFormMain.clbListaProcesosClickCheck(Sender: TObject);
 begin
   FilterMessagesByProcesses;
+end;
+
+procedure TFormMain.clbListaProcesosContextPopup(Sender: TObject;  MousePos: TPoint; var Handled: Boolean);
+var
+  idx: Integer;
+begin
+  // Item más cercano
+  idx := clbListaProcesos.ItemAtPos(MousePos, True);
+  if idx <> -1 then begin
+    clbListaProcesos.ItemIndex := idx;
+    clbListaProcesos.SetFocus; // Opcional: asegura que el ListBox tenga el foco
+  end
+  else
+  begin
+    // Si clicas en zona vacía, opcionalmente cancela el popup
+    Handled := True;
+  end;
 end;
 
 procedure TFormMain.ConfigureActions;
@@ -518,9 +1038,10 @@ begin
   UpdateCaption;
   // Panel de IDs (sólo debug) - no interesa
   pnlIDsProcs.Visible := False;
-  splListaProcesos.Visible := False;
   pnlListaProcesos.Align := alClient;
   pnlUpdate.Visible := False;
+  splListaProcesos.Top := pnlBookmarks.Top + 20;
+  splListaProcesos.Visible := True;
 
   // Columna de mensaje
   TGridHelper.AutoajustarAnchoColumna(dbgMensajes, 'Mensaje');
@@ -537,7 +1058,7 @@ var
 begin
 
   // Imagen de pausado si es necesario
-  if Pausado then begin
+  if (Pausado) and (not (gsFileLoaded in FGlobalStates)) then begin
     // Dibujar la imagen en el canvas del DBGrid
     TDBGrid(Sender).Canvas.StretchDraw(TRect.Create(10, 10, 150, 150), ImagePause.Picture.Graphic);
     Exit;
@@ -552,7 +1073,15 @@ begin
   else
     // aColor := clInfoBk;
     aColor := ListaProcesos.GetColorByName(TDBGrid(Sender).DataSource.DataSet.FieldByName('ProcessName').AsString);
-  TGridHelper.DoColorLine(TDBGrid(Sender), Rect, aColor, Column.Field.AsString, Column.Field)
+  TGridHelper.DoColorLine(TDBGrid(Sender), Rect, aColor, Column.Field.AsString, Column.Field);
+
+  if Column.FieldName = 'BM' then
+    if Column.Field.AsString <> string.Empty then begin
+      TDBGrid(Sender).Canvas.Brush.Color := clRed;
+      TDBGrid(Sender).Canvas.Rectangle(Rect);
+      TDBGrid(Sender).Canvas.Pen.Color := clRed;
+      TDBGrid(Sender).DefaultDrawDataCell(Rect, Column.Field, []);
+    end;
 end;
 
 procedure TFormMain.erminal2Click(Sender: TObject);
@@ -605,7 +1134,7 @@ begin
       end;
     end;
   finally
-    Log('Hay Filtro: ' + BoolToStr(Result, True));
+    // Log('Hay Filtro: ' + BoolToStr(Result, True));
   end;
 end;
 
@@ -618,27 +1147,79 @@ const
   FIELDNAME = 'PROCESSNAME';
 begin
   try
-    // Si no hay filtro, False y salimos...
-    if not HayFiltroActivo then begin
-      mtMensajes.Filtered := False;
-      Exit;
+    dbgMensajes.LockDrawing;
+    mtMensajes.DisableControls;
+    try
+      // Si no hay filtro, False y salimos...
+      if not HayFiltroActivo then begin
+        mtMensajes.Filtered := False;
+        Exit;
+      end;
+
+      // Valor del filtro
+      sFiltro := INIFILTER;
+      for var i := 0 to (clbListaProcesos.Count - 1) do
+        if (not clbListaProcesos.Checked[i]) then
+          sFiltro := sFiltro + Format(FILTERTEMPLATE, [FIELDNAME, QuotedStr(clbListaProcesos.items[i])]);
+
+      Log('Filtro= ' + sFiltro);
+
+      // Activarlo
+      mtMensajes.Filter := sFiltro;
+      mtMensajes.Filtered := True;
+    finally
+      dbgMensajes.UnlockDrawing;
+      mtMensajes.EnableControls;
     end;
-
-    // Valor del filtro
-    sFiltro := INIFILTER;
-    for var i := 0 to (clbListaProcesos.Count - 1) do
-      if (not clbListaProcesos.Checked[i]) then
-        sFiltro := sFiltro + Format(FILTERTEMPLATE, [FIELDNAME, QuotedStr(clbListaProcesos.items[i])]);
-
-    Log('Filtro= ' + sFiltro);
-
-    // Activarlo
-    mtMensajes.Filter := sFiltro;
-    mtMensajes.Filtered := True;
   finally
     // Update statusbar
     UpdateStatusBar;
   end;
+end;
+
+procedure TFormMain.FindDialogClose(Sender: TObject);
+begin
+  // Restauramos el estado
+  Pausado := EstadoActualPausado;
+end;
+
+procedure TFormMain.FindDialogFind(Sender: TObject);
+var
+  b:boolean;
+  lOptions:TFDDataSetLocateOptions;
+begin
+  // Buscando texto en los mensajes
+  if (gsFirstSearch in FGlobalStates) then
+    mtMensajes.First;
+
+  try
+    var sBusqueda: string := '(Mensaje like ' + QuotedStr('%' + Trim(FindDialog.FindText) + '%') + ') OR ' +
+                             '(ProcessName like ' + QuotedStr('%' + Trim(FindDialog.FindText) + '%') + ') OR ' +
+                             '(ProcessId like ' + QuotedStr('%' + Trim(FindDialog.FindText) + '%') + ')';
+
+    // Opciones para busqueda hacia adelante y atrás
+    if (frDown in TFindDialog(Sender).Options) then
+      lOptions := [lxoCaseInsensitive, lxoCaseInsensitive, lxoFromCurrent]
+    else
+      lOptions := [lxoCaseInsensitive, lxoCaseInsensitive, lxoFromCurrent, lxoBackward];
+
+    b := mtMensajes.LocateEx(sBusqueda, lOptions);
+
+    if (not b) then
+      sbMain.Panels[0].Text := DKLangConstW('msg_NoEncontrado');
+
+    Log('Encontado=' + BoolToStr(b, True));
+  finally
+    FGlobalStates := FGlobalStates - [gsFirstSearch];
+  end;
+end;
+
+procedure TFormMain.FindDialogShow(Sender: TObject);
+begin
+  // Nos quedamos con el estado al iniciar la busqueda
+  EstadoActualPausado := Pausado;
+  FGlobalStates := FGlobalStates + [gsFirstSearch];
+  Pausado := True;
 end;
 
 procedure TFormMain.FontDialogViewApply(Sender: TObject; Wnd: HWND);
@@ -650,8 +1231,9 @@ procedure TFormMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Pausado := True;
   SaveConfiguration;
-  if thCapture.Started then
+  if thCapture.Started then begin
     thCapture.Terminate;
+  end;
 end;
 
 procedure TFormMain.FormCreate(Sender: TObject);
@@ -667,9 +1249,13 @@ begin
   // Clase para log
   FLog := TFactoryLog.GetClass(TLogMemo);
   TLogMemo(FLog).Memo := mmLog;
+  // Lista de bookmarks
+  FListaBookmarks := TBookmarkListDSV.Create;
   // Clave para configuraciones
   FConfig := TFactoryConfig.GetClass(TFileConfig);
   TFileConfig(FConfig).FileName := GetConfigFileName;
+  // Asignar extensión de fichero a esta aplicación
+  AsignarExtension('.dsvlog', 'DebugStringView', ParamStr(0));
 
   Log('+TFormMain.FormCreate');
 end;
@@ -678,6 +1264,7 @@ procedure TFormMain.FormDestroy(Sender: TObject);
 begin
   if Assigned(ListaProcesos) then
     FreeAndNil(ListaProcesos);
+  FreeAndNil(FListaBookmarks);
 end;
 
 procedure TFormMain.FormResize(Sender: TObject);
@@ -686,6 +1273,18 @@ begin
 end;
 
 procedure TFormMain.FormShow(Sender: TObject);
+
+  procedure Ocultar;
+  begin
+    AlphaBlendValue := 100;
+    AlphaBlend := True;
+  end;
+  procedure Visualizar;
+  begin
+    AlphaBlendValue := 255;
+    AlphaBlend := False;
+  end;
+
 begin
   // Inicalizar el Dataset
   IniData;
@@ -701,6 +1300,15 @@ begin
   UpdateStatusBar;
   // Recuperar configuraciones alamacenadas
   RestoreConfiguration;
+
+  Ocultar;
+  try
+    var FormSplash := TFormSplash.Create(nil);
+    FormSplash.ShowModal;
+    FormSplash.Free;
+  finally
+    Visualizar;
+  end;
 end;
 
 function TFormMain.GetColorPorProceso: boolean;
@@ -728,6 +1336,11 @@ begin
   Log('Ayuda=' + Result);
 end;
 
+function TFormMain.GetPausado: boolean;
+begin
+  Result := (gsPaused in FGlobalStates);
+end;
+
 procedure TFormMain.CambiarIdioma(aID:integer);
 begin
   var iIndex := aID;
@@ -751,14 +1364,51 @@ procedure TFormMain.IniData;
 begin
   MsgIndex := 0;
   mtMensajes.Open;
+  SavedFileName := string.Empty;
+  FicheroCargado := False;
+  FGlobalStates := [];
+end;
+
+
+// Añadir un elemento nuevo al Grid
+procedure TFormMain.AddProcessFromFile(const aProcessId: Word; const aProcessName, aMensaje: string; const aBookmark:integer=-1);
+begin
+
+  Inc(MsgIndex);
+
+  // crear la información del proceso y actualizar la lista
+  UpdateProcessList(aProcessId, aProcessName);
+
+  // ***************************  DBGRID ****************************************
+  try
+    mtMensajes.DisableControls;
+    try
+      // Añadir el registro
+      mtMensajes.Append;
+      mtMensajesID.AsInteger := MsgIndex;
+      mtMensajesFecha.AsString := DateToStr(Date);
+      mtMensajesHora.AsString := TimeToStr(Time);
+      mtMensajesProcessId.AsInteger := aProcessId;
+      mtMensajesNombre.AsString := aProcessName;
+      mtMensajesMensaje.AsString := aMensaje;
+      if (aBookmark <> -1) then
+        mtMensajesBM.AsInteger := aBookmark;
+      mtMensajes.Post;
+    finally
+      mtMensajes.EnableControls;
+    end;
+  except
+    Log('ERROR al añadir (DBGrid)');
+  end;
+
+  UpdateStatusBar;
 end;
 
 // Procedimiento para mostrar losmensajes que llegan desde debug
 procedure TFormMain.ProcSharedInfo(const aProcessId:Word; const aMensaje:string);
 begin
-
   // Si está pausado, salimos...
-  if Pausado then
+  if Pausado or (gsFileLoaded in FGlobalStates) or (gsPopupMenu in FGlobalStates) or (gsBookmark in FGlobalStates) then
     Exit;
   if not Assigned(thCapture) then
     Exit;
@@ -811,6 +1461,8 @@ begin
     actAutoscroll.Checked := StrToBoolDef(FConfig.GetItem('actAutoscrollChecked'), actAutoscroll.Checked);
     actListaProcesos.Checked := StrToBoolDef(FConfig.GetItem('actListaProcesosChecked'), actListaProcesos.Checked);
     actListaProcesosExecute(actListaProcesos);
+    actVerToolbar.Checked := StrToBoolDef(FConfig.GetItem('actVerToolbarChecked'), actVerToolbar.Checked);
+    actVerToolbarExecute(actVerToolbar);
     actColorProceso.Checked := StrToBoolDef(FConfig.GetItem('actColorProcesoChecked'), actColorProceso.Checked);
     actColorProcesoExecute(actColorProceso);
     // Estado de las columnas (visibles)
@@ -822,7 +1474,14 @@ begin
     TGridHelper.GetColumnByFieldName(dbgMensajes, 'Hora').Visible := actHora.Checked;
     // Actualizaciones
     actBuscarActIniciar.Checked := StrToBoolDef(FConfig.GetItem('SearchUpInicio'), actBuscarActIniciar.Checked);
-
+    // Idioma selecciona
+    var idioma:integer;
+    try
+      idioma := AssignIfNotEmpty(FConfig.GetItem('Idioma'), 1033);
+    except
+      idioma := 1033;
+    end;
+    LangManager.LanguageID := idioma;
 
     // Fuente activa
     var fName := FConfig.GetItem('FontName');
@@ -832,6 +1491,127 @@ begin
 
   except
     raise Exception.Create(Format(DKLangConstW('errRestoreConfig1'), [GetConfigFileName]) + sLineBreak + DKLangConstW('errRestoreConfig2'));
+  end;
+end;
+
+procedure TFormMain.LimpiarProceso(const aProcessName: string);
+var
+  listaIds:TList<integer>;
+begin
+  // No activo
+  if (not mtMensajes.Active) then begin
+    Log('El dataset de mensajes no está activo');
+    Exit;
+  end;
+
+  listaIds := TList<integer>.Create;
+  try
+
+    // Buscar el proceso en la lista
+    var pi:TProcessInfo := ListaProcesos.GetProcessOject(aProcessName);
+    if not Assigned(pi) then begin
+      Log(Format('Error, no se ha encontrado el proceso [%S]', [aProcessName]));
+      Exit;
+    end
+    else begin
+      // obtener la lista de Ids
+      Log('Lista de IDs ------------------------------------');
+      for var i := 0 to (pi.ProcessIdList.Count - 1) do begin
+        Log('   ' + pi.ProcessIdList[i].ToString);
+        listaIds.Add(pi.ProcessIdList[i]);
+      end;
+    end;
+
+    var sFiltro:string := string.Empty;
+    // Habilitar un filtro para encontrar los registros con PROCESSID = 1234
+    for var i := 0 to (listaIds.Count - 1) do begin
+      if (i > 0) then
+        sFiltro := sFiltro + ' AND ';
+      sFiltro := sFiltro + Format('(PROCESSID = %d)', [listaIDs[i]]);
+    end;
+    Log(' Filtro=' + sFiltro);
+
+    dbgMensajes.LockDrawing;
+    mtMensajes.DisableControls;
+    try
+      mtMensajes.Filter := sFiltro;
+      mtMensajes.Filtered := True; // Activar el filtro
+
+      try
+        // Si hay registros en la tabla que cumplen con el filtro, eliminarlos
+        mtMensajes.First; // Posicionarse en el primer registro visible según el filtro
+        while not mtMensajes.Eof do
+          mtMensajes.Delete; // Eliminar el registro actual
+
+      finally
+        // Desactivar el filtro y limpiar por si lo necesitas más tarde
+        mtMensajes.Filtered := False;
+        mtMensajes.Filter := '';
+      end;
+    finally
+      dbgMensajes.UnlockDrawing;
+      mtMensajes.EnableControls;
+    end;
+  finally
+    FreeAndNil(listaIds);
+  end;
+end;
+
+procedure TFormMain.LoadBookmarks(TS:TStrings; const AIndex:integer);
+begin
+  Log('Se van a leer los bookmarks del fichero');
+  for var i := AIndex to (TS.Count - 1) do begin
+    var str := TS[i];
+    var bm:TBookmarkDSV := TBookmarkDSV.Create(0, 0, '', nil);
+    bm.FromString(str);
+
+    Log('Bookmark -> ID=' + bm.ID.ToString + '  - Numero=' + bm.Numero.ToString + ' - Desc=' + bm.Descripcion);
+
+    Log(bm.ToString);
+
+    // Añadir el nuevo bookmark
+    FGlobalStates := FGlobalStates + [gsBookmark];
+    try
+      var sBusqueda: string := '(ID=' + bm.ID.ToString + ')';
+      mtMensajes.First;
+      var b := mtMensajes.LocateEx(sBusqueda,  [lxoCaseInsensitive, lxoCaseInsensitive, lxoFromCurrent]);
+
+      if b then begin
+        Log('ENCONTRADO!!');
+        var book := mtMensajes.GetBookmark;
+
+        // Añadirlo
+        var j:integer := ListaBookmarks.Count + 1;
+        ListaBookmarks.Add(j, bm.ID, bm.Descripcion, book);
+
+        // Añadirlo al Dataset
+        mtMensajes.Edit;
+        mtMensajesBM.AsInteger := j;
+        mtMensajes.Post;
+
+        UpdateBookMarksList;
+
+      end
+      else
+        Log('NO ENCONTRADO!!!');
+    finally
+      FGlobalStates := FGlobalStates - [gsBookmark];
+    end;
+  end;
+
+  // Añadirlo y crear el bookmark
+
+end;
+
+procedure TFormMain.SaveBookmarks(TS:TStrings);
+begin
+  if (ListaBookmarks.Count = 0) then
+    Exit;
+  // añadir al final los bookmarks
+  for var i := 0 to (ListaBookmarks.Count - 1) do begin
+    var bm := TBookmarkDSV(ListaBookmarks.Objects[i]);
+    var str := bm.ToString;
+    TS.Add(Str);
   end;
 end;
 
@@ -849,6 +1629,7 @@ begin
     FConfig.AddItem('actSoloVisiblesChecked', actSoloVisibles.Checked.ToString);
     FConfig.AddItem('actAutoscrollChecked', actAutoscroll.Checked.ToString);
     FConfig.AddItem('actListaProcesosChecked', actListaProcesos.Checked.ToString);
+    FConfig.AddItem('actVerToolbarChecked', actVerToolbar.Checked.ToString);
     FConfig.AddItem('actColorProcesoChecked', actColorProceso.Checked.ToString);
     // Estado de las columnas (visibles)
     FConfig.AddItem('actIDChecked', actID.Checked.ToString);
@@ -858,6 +1639,8 @@ begin
     FConfig.AddItem('FontName', TFontUtils.GetFontActive(Fuentedeletra1));
     // Actualizaciones
     FConfig.AddItem('SearchUpInicio', actBuscarActIniciar.Checked.ToString);
+    // Idioma selecciona
+    FConfig.AddItem('Idioma', LangManager.LanguageID.ToString);
 
     // Grabar
     FConfig.SaveConfig;
@@ -909,7 +1692,10 @@ end;
 
 procedure TFormMain.SetPausado(const Value: boolean);
 begin
-  FPausado := Value;
+  if (Value) then
+    FGlobalStates := FGlobalStates + [gsPaused]
+  else
+    FGlobalStates := FGlobalStates - [gsPaused];
   dbgMensajes.Invalidate;
   ConfigureActions;
   UpdateStatusBar;
@@ -947,22 +1733,45 @@ begin
   ListaProcesos.Debug;
 end;
 
-procedure TFormMain.UpdateCaption;
+procedure TFormMain.UpdateBookMarksList;
 begin
-  Caption := TITLEAPP + '   (v.' + GetAppVersion(ParamStr(0)) + ') ';
+  lbBookmarks.Clear;
+  for var i := 0 to (ListaBookmarks.Count - 1) do begin
+    var obj := TBookmarkDSV(ListaBookmarks.Objects[i]);
+    lbBookmarks.Items.Add(Format('%.2d',[obj.Numero, 2]) + ' - ' + obj.Descripcion);
+  end;
+end;
+
+procedure TFormMain.UpdateCaption;
+var
+  DateCreate, DateWrite, DateAccess:TDateTime;
+begin
+  // fechaHoras del fichero
+  TFileUtils.GetExeFileDateTimes(DateCreate, DateWrite, DateAccess);
+
+  Caption := TITLEAPP + '   (v.' + GetAppVersion(ParamStr(0)) + ' - ' + FormatDateTime('dd/mm/yyyy', DateWrite)  + ') ';
   // Si tenemos nombre de fichero, se añade...
   if FSavedFileName <> string.Empty then
     Caption := Caption + '  -  ' + FSavedFileName;
 end;
 
+procedure TFormMain.InternalUpdateProcessCheckList(const aProcessName:string);
+begin
+  var index := clbListaProcesos.Items.AddObject(aProcessName, ListaProcesos.GetProcessOject(aProcessName));
+  clbListaProcesos.Checked[index] := True;
+end;
+
+
+procedure TFormMain.UpdateProcessList(const aProcessId: integer; const pName:string);
+begin
+  var b := ListaProcesos.AddProcessByName(pName, aProcessId);
+  if b then
+    InternalUpdateProcessCheckList(pName);
+  InternalUpdateProcessIdList(pName);
+end;
+
+
 procedure TFormMain.UpdateProcessList(const aProcessId: integer);
-
-  procedure InternalUpdateProcessCheckList(const aProcessName:string);
-  begin
-    var index := clbListaProcesos.Items.AddObject(aProcessName, ListaProcesos.GetProcessOject(aProcessName));
-    clbListaProcesos.Checked[index] := True;
-  end;
-
 begin
   var pName:string := ExtractFileName(TProcessUtils.GetProcessNameByPID(aProcessId));
   var b := ListaProcesos.AddProcessByName(pName, aProcessId);
@@ -987,3 +1796,4 @@ begin
 end;
 
 end.
+

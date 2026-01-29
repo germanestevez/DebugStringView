@@ -13,7 +13,9 @@ uses
   uConfig.Classes in 'uConfig.Classes.pas',
   FAcercaDe in 'FAcercaDe.pas' {FormAcercaDe},
   uRecursos in 'uRecursos.pas',
-  uUpdates in 'uUpdates.pas';
+  uUpdates in 'uUpdates.pas',
+  uBookmarks.Classes in 'uBookmarks.Classes.pas',
+  FSplash in 'FSplash.pas' {FormSplash};
 
 {$R *.res}
 {$R *.dkl_const.res}

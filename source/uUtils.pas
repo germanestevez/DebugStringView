@@ -7,6 +7,11 @@ uses
   System.Generics.Collections, System.UITypes, System.Math, VCL.CheckLst, VCL.Menus, VCL.ComCtrls;
 
 type
+  /// <summary> Clase con utilidades sobre ficheros </summary>
+  TFileUtils = class
+    class procedure GetExeFileDateTimes(var aDateCreate, aDateWrite, aDateAccess:TDateTime);
+  end;
+
   /// <summary> Clase con utilidades para trabajar con colores </summary>
   TColorUtils = class
     /// <summary> Generar un color  aleatorio </summary>
@@ -23,7 +28,6 @@ type
   TStringUtils = class
     class function PadRight(const Input: string; Length: Integer): string;
   end;
-
 
   TSelType = (stAll, stNone, stInvert);
   /// <summary> Clase para gestionar las operacoines de selección en u TCheckListBox (all, None, Invert)  </summary>
@@ -60,13 +64,39 @@ function AssignIfNotEmpty(aValue:Variant; aDefaultValue:Variant): Variant;
 // compara 2 versiones de programa almacenas en formato string
 // 1  -> primera mayor    // -1 -> segunda mayor    // 0  -> versiones iguales
 function CompareVersions(const Version1, Version2: string): Integer;
-
+// Asignar la extensión por defecto a esta aplicación
+procedure AsignarExtension(const AExtension, AppName, AppPath:string);
 
 
 implementation
 
 uses
+  System.IOUtils,
+  Registry, ShlObj,
   CommCtrl, Forms, System.StrUtils;
+
+// extension (con punto)      .dsvlog
+// Nombre de la app.          DebugStringView
+// Path de la aploicación
+procedure AsignarExtension(const AExtension, AppName, AppPath:string);
+begin
+  with TRegistry.Create do
+  try
+    RootKey := HKEY_CURRENT_USER;
+    if OpenKey('\Software\Classes\' + AExtension, True) then
+      WriteString('', AppName);
+    if OpenKey('\Software\Classes\' + AppName, True) then
+      WriteString('', 'Debug String View Application');
+    if OpenKey('\Software\Classes\' + AppName + '\DefaultIcon', True) then
+      WriteString('', '"' + AppPath + '",1');
+	    // WriteString('', AppPath);
+    if OpenKey('\Software\Classes\' + AppName + '\shell\open\command', True) then
+      WriteString('', AppPath + '  "%1"');
+  finally
+    Free;
+  end;
+  SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil {0}, nil {0});
+end;
 
 function AssignIfNotEmpty(aValue:Variant; aDefaultValue:Variant): Variant;
 begin
@@ -265,6 +295,18 @@ begin
   FProgressBar.Max := iTotal;
   FProgressBar.Position := Min(iStep, FProgressBar.Max);   // modo paranoico
   Application.ProcessMessages;
+end;
+
+{ TFileUtils }
+
+class procedure TFileUtils.GetExeFileDateTimes(var aDateCreate, aDateWrite, aDateAccess: TDateTime);
+var
+  ExePath:string;
+begin
+  ExePath  := ParamStr(0);
+  aDateCreate := TFile.GetCreationTime(ExePath);       // creación
+  aDateWrite  := TFile.GetLastWriteTime(ExePath);      // última modificación
+  aDateAccess := TFile.GetLastAccessTime(ExePath);     // último acceso
 end;
 
 end.

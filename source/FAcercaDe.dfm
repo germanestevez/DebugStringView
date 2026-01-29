@@ -360,7 +360,7 @@ object FormAcercaDe: TFormAcercaDe
       Top = 43
       Width = 207
       Height = 15
-      Caption = '(C) Germ'#225'n Est'#233'vez  -Neftal'#237'-          2025'
+      Caption = '(C) Germ'#225'n Est'#233'vez  -Neftal'#237'-          2026'
     end
     object lblTexto: TLabel
       Left = 88

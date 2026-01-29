@@ -32,6 +32,10 @@ Utiliza para el multiidioma [los componentes DKLang](https://github.com/yktoo/dk
  - La aplicación es multiidioma y fácilmente ampliable con más ficheros de idioma sin necesidad de cambios en la aplicación (carga de idioma dinámica).
  - Comprobación de actualizaciones disponible y automática al entrar en la aplicación.
  - Columnas personalizables.
+ - Permite gestión de bookmarks para marcar posiciones importantes.
+ - Búsqueda rápida de mensajes por texto.
+ - Permite cargar ficheros de log previamente almacenados en la aplicación.
+
 
 ## Multiidioma
 La aplicación trabaja con múltiples idiomas, que además que cargan de forma dinámica. Se pueden incorporar más idiomas de forma fácil (y sin recompilar) y la aplicación los reconocerá y los incorporará al menú de forma automática una vez que se ejecute.

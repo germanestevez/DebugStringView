@@ -26,6 +26,7 @@ type
     function AddProcessByName(const aProcessName:string; const aProcessId:DWORD):boolean;
     function GetProcessOject(const aProcessName:string):TProcessInfo;
     function GetColorByName(aProcessName:string):TColor;
+    function GetIndexByName(aProcessName:string):Integer;
     procedure Debug;
     /// <summary> Objeto de log </summary>
     property Log:ILog read FLog write FLog;
@@ -160,6 +161,17 @@ begin
   var pInfo:TProcessInfo := TProcessInfo(Objects[index]);
   if Assigned(pInfo) then
     Result := pInfo.Color;
+end;
+
+function TProcessList.GetIndexByName(aProcessName: string): Integer;
+var
+  index:integer;
+begin
+  Result := -1;
+  var b := Find(aProcessName, index);
+  if not b then
+    Exit;
+  Result := index;
 end;
 
 function TProcessList.GetProcessOject(const aProcessName:string): TProcessInfo;
