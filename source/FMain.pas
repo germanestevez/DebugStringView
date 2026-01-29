@@ -294,6 +294,9 @@ type
     procedure ConfigureActions;
     procedure IniData;
 
+    // actualizar los menús con las ocpiones que llegan de configuracion
+    procedure UpdateMenus;
+
     // Actualizar en ejecución partes del programa *****************************
     procedure UpdateProcessList(const aProcessId:integer; const pName:string); overload;
     procedure UpdateProcessList(const aProcessId: integer); overload;
@@ -1034,8 +1037,6 @@ end;
 
 procedure TFormMain.ConfigureVisualControls;
 begin
-  // Títulos para la Columnas del grid
-  UpdateCaption;
   // Panel de IDs (sólo debug) - no interesa
   pnlIDsProcs.Visible := False;
   pnlListaProcesos.Align := alClient;
@@ -1300,6 +1301,11 @@ begin
   UpdateStatusBar;
   // Recuperar configuraciones alamacenadas
   RestoreConfiguration;
+  // Actualizar opciones de menús (idiomas,...)
+  UpdateMenus;
+  // Títulos para la Columnas del grid
+  UpdateCaption;
+
 
   Ocultar;
   try
@@ -1344,8 +1350,9 @@ end;
 procedure TFormMain.CambiarIdioma(aID:integer);
 begin
   var iIndex := aID;
-  if iIndex<0 then iIndex := 0; // When there's no valid selection in cbLanguage we use the default language (Index=0)
-  LangManager.LanguageID := LangManager.LanguageIDs[iIndex];
+  if aID<0 then
+    iIndex := 0; // When there's no valid selection in cbLanguage we use the default language (Index=0)
+  LangManager.LanguageID := iIndex {LangManager.LanguageIDs[iIndex]};
 end;
 
 procedure TFormMain.IdiomaClick(Sender: TObject);
@@ -1491,6 +1498,17 @@ begin
 
   except
     raise Exception.Create(Format(DKLangConstW('errRestoreConfig1'), [GetConfigFileName]) + sLineBreak + DKLangConstW('errRestoreConfig2'));
+  end;
+end;
+
+procedure TFormMain.UpdateMenus;
+begin
+
+  for var i := 0 to (Idiomas2.Count - 1) do begin
+    if (Integer(Idiomas2.Items[i].Tag) = Integer(LangManager.LanguageID)) then begin
+      Idiomas2.Items[i].Checked := True;
+      Exit;
+    end;
   end;
 end;
 
@@ -1666,7 +1684,7 @@ begin
     item.RadioItem := True;
     item.GroupIndex := 15;    // groupIndex único para los idiomas
     item.Caption := LangManager.LanguageNames[i];
-    item.Tag := i;
+    item.Tag := LangManager.LanguageIDs[i]{i};
     if (i = 0) then begin
       item.Caption := 'Español';
       item.Checked := True;  // 0 siempre es el Español
@@ -1749,7 +1767,7 @@ begin
   // fechaHoras del fichero
   TFileUtils.GetExeFileDateTimes(DateCreate, DateWrite, DateAccess);
 
-  Caption := TITLEAPP + '   (v.' + GetAppVersion(ParamStr(0)) + ' - ' + FormatDateTime('dd/mm/yyyy', DateWrite)  + ') ';
+  Self.Caption := TITLEAPP + '   (v.' + GetAppVersion(ParamStr(0)) + ' - ' + FormatDateTime('dd/mm/yyyy', DateWrite)  + ') ';
   // Si tenemos nombre de fichero, se añade...
   if FSavedFileName <> string.Empty then
     Caption := Caption + '  -  ' + FSavedFileName;

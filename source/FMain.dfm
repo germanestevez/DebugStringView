@@ -45565,7 +45565,6 @@ object FormMain: TFormMain
         Font.Height = -12
         Font.Name = 'Cascadia Code'
         Font.Style = []
-        ItemHeight = 17
         ParentFont = False
         PopupMenu = pmProcesos
         Sorted = True
