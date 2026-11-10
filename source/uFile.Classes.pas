@@ -20,6 +20,7 @@ type
   ISaveLoadDSToFile = interface(IFile)
     procedure SetLog(aLog:ILog);
     procedure SetDataset(aDataset:TDataset);
+    procedure SetFiltered(const aFiltered:boolean);
   end;
 
   /// <summary> clase base para guardar Datasets a fichero </summary>
@@ -28,6 +29,7 @@ type
     procedure SetDataset(aDataset:TDataset); virtual; abstract;
     procedure Save(const aFileName:TFileName); virtual; abstract;
     procedure Open(const aFileName:TFileName); virtual; abstract;
+    procedure SetFiltered(const aFiltered:boolean); virtual; abstract;
   end;
   TClassDSSaveToFileBase = class of TSaveDSToFileBase;
 
@@ -46,6 +48,7 @@ type
     FOnProgress: TProgressProc;
     FVersion: string;
     FSaveExtendedInfo: TSaveExtendedInfo;
+    FFiltered:boolean;
     /// <summary> Validaciones antes de guardar </summary>
     procedure Validate(const aFileName:TFileName);
     procedure SaveCabecera(TS:TStrings);
@@ -53,9 +56,10 @@ type
     /// <summary> Obtener el tamaño aprox. del fichero de salida </summary>
     //---class function GetDataSetSize(aDataSet:TDataSet): Integer;
     /// <summary> Obtener el nombre de fichero propuesto de salida </summary>
-    class function GetFileName: TFileName;
+    class function GetFileName(const aProcessId:integer): TFileName;
     procedure SetDataset(aDataset:TDataset); override;
     procedure SetLog(aLog:ILog); override;
+    procedure SetFiltered(const aFiltered:boolean); override;
     /// <summary> Procedimiento de grabación a disco </summary>
     procedure Save(const aFileName:TFileName); override;
     /// <summary> Evento para seguir el progreso de la grabación </summary>
@@ -78,6 +82,7 @@ type
     procedure SetDataset(aDataset:TDataset); virtual; abstract;
     procedure Save(const aFileName:TFileName); virtual; abstract;
     procedure Open(const aFileName:TFileName); virtual; abstract;
+    procedure SetFiltered(const aFiltered:boolean); virtual; abstract;
   end;
   TClassDSLoadFromFileBase = class of TLoadDSFromFileBase;
 
@@ -106,6 +111,7 @@ type
     class function GetFileName: TFileName;
     procedure SetDataset(aDataset:TDataset); override;
     procedure SetLog(aLog:ILog); override;
+    procedure SetFiltered(const aFiltered:boolean); override;
     // permite llamar para leer información extra al final del fichero (deberia ir con // al inicio)
     property LoadExtendedInfo:TLoadExtendedInfo read FLoadExtendedInfo write FLoadExtendedInfo;
     /// <summary> Procedimiento de grabación a disco </summary>
@@ -177,6 +183,11 @@ begin
   FLog := aLog;
 end;
 
+procedure TSaveDSToFile.SetFiltered(const aFiltered:boolean);
+begin
+  FFiltered := aFiltered;
+end;
+
 procedure TSaveDSToFile.Validate(const aFileName:TFileName);
 var
   deleted:boolean;
@@ -193,14 +204,21 @@ begin
     raise Exception.Create(DKLangConstW('err_SinDatosAsignado'));
 end;
 
-class function TSaveDSToFIle.GetFileName: TFileName;
+class function TSaveDSToFIle.GetFileName(const aProcessId:integer): TFileName;
+var
+  sProcessId:string;
 begin
-  Result := 'DSV_All_' + FormatDateTime('yyyymmdd_hhnnss', now) + '.' + LOGFILE_EXTENSION;
+  sProcessId := string.Empty;
+  if (aProcessId <> 0) then
+    sProcessId := aProcessId.ToString;
+
+  Result := 'DSV_All_' + FormatDateTime('yyyymmdd_hhnnss', now) + '_pid' + sProcessId + '.' + LOGFILE_EXTENSION;
 end;
 
 procedure TSaveDSToFIle.Save(const aFileName:TFileName);
 var
   index:integer;
+  actualFilter:boolean;
 
   procedure CallbackStep(const aDataset:TDataset; const aIndex:integer);
   begin
@@ -221,18 +239,26 @@ begin
 
   var TS:TStrings := TStringList.Create;
   try
+    FDataset.DisableControls;
     var ds:TDataset := FDataset.GetClonedDataSet(True);
+
+    // marcamos si queremos todos o sólo los mensajes filtrados
+    actualFilter := ds.Filtered;
+    ds.Filtered := FFiltered;
+
     try
       var bm := ds.GetBookmark;
       try
         SaveCabecera(TS);
+
+        FLog.Log('Filtrado: ' + BoolToStr(ds.Filtered, True) + ' - Filtro:' + ds.Filter);
 
         FDataset.First;
         while not ds.eof do begin
           Inc(index);
           var str:string;
           for var i := 0 to (ds.FieldCount - 1) do begin
-            FLog.Log('Campo=' + ds.Fields[i].FieldName + '  - DisplayWidth=' + ds.Fields[i].DisplayWidth.ToString);
+//            FLog.Log('Campo=' + ds.Fields[i].FieldName + '  - DisplayWidth=' + ds.Fields[i].DisplayWidth.ToString);
             if (ds.Fields[i].FieldName = 'Mensaje') then begin
               Str := Str + Trim(ds.Fields[i].AsString);
             end
@@ -269,6 +295,8 @@ begin
         ds.GotoBookmark(bm)
       end;
     finally
+      ds.Filtered := actualFilter;
+      FDataset.EnableControls;
       FreeAndNil(ds);
     end;
   finally
@@ -391,6 +419,11 @@ end;
 procedure TLoadDSFromFile.SetLog(aLog: ILog);
 begin
   FLog := aLog;
+end;
+
+procedure TLoadDSFromFile.SetFiltered(const aFiltered:boolean);
+begin
+  // Nada
 end;
 
 procedure TLoadDSFromFile.Validate(const aFileName: TFileName);

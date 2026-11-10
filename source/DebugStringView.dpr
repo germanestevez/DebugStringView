@@ -22,7 +22,7 @@ uses
 
 begin
   Application.Initialize;
-// Desactivar para detectar MemoryLeaks
+// Activar para detectar memory leaks
 //{$IFDEF DEBUG}
 //  ReportMemoryLeaksOnShutdown := True;
 //{$ENDIF}

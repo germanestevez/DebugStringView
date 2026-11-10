@@ -193,6 +193,8 @@ type
     Limpiaresteproceso1: TMenuItem;
     actLimpiarProcesoGrid: TAction;
     Nuevacaptura1: TMenuItem;
+    actGuardarProceso: TAction;
+    Guardarsloprocesoactual1: TMenuItem;
     procedure FormShow(Sender: TObject);
     procedure actSalirExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -262,6 +264,7 @@ type
     procedure actNuevoExecute(Sender: TObject);
     procedure actLimpiarProcesoGridExecute(Sender: TObject);
     procedure actLimpiarProcesoGridUpdate(Sender: TObject);
+    procedure actGuardarProcesoExecute(Sender: TObject);
 
   private
     EstadoActualPausado:boolean;
@@ -280,7 +283,7 @@ type
 
     // Menú de fichero *********************************************************
     // Grabar el fichero
-    procedure InternalSaveFile(aFileName:TFileName);
+    procedure InternalSaveFile(aFileName:TFileName; const aFiltrados:boolean; const aProcessId:integer=0);
     // Abrir un fichero de disco
     procedure InternalOpenFile;
     // fichero de configuración
@@ -344,6 +347,8 @@ type
     property FicheroCargado:boolean read FFicheroCargado write FFicheroCargado default False;
     // limpiar datos de un proceso
     procedure DoLimpiarProceso(const aProcessName:string);
+    // Eliminar bookmarks por PROCESSNAME o PROCESSID, sin borrar los mensajes
+    procedure LimpiarBookmarksProceso(const aProcessName:string);
     /// <summary> Nombre del fichero (si ya se ha guardado) </summary>
     property SavedFileName:TFileName read FSavedFileName write FSavedFileName;
     /// <summary> Si tenemos activado la coloracion por proceso </summary>
@@ -643,8 +648,10 @@ begin
   end;
 end;
 
-procedure TFormMain.InternalSaveFile(aFileName:TFileName);
+procedure TFormMain.InternalSaveFile(aFileName:TFileName; const aFiltrados:boolean; const aProcessId:integer=0);
 begin
+
+  FLog.Log('Mensajes filtrados: ' + BoolToStr(aFiltrados, True));
 
   var progress := TProcessProgress.Create(pbProceso, sbMain, 4);
   try
@@ -658,9 +665,9 @@ begin
 
     try
       // Nombre del fichero
-      if (aFileName = String.Empty) then begin
+      if (aFileName = String.Empty) or (aProcessId <> 0) then begin
         // // Uno por defecto y luego el dialogo
-        FileSaveDialog.FileName := TSaveDSToFIle.GetFileName;
+        FileSaveDialog.FileName := TSaveDSToFIle.GetFileName(aProcessId);
 
         var b := FileSaveDialog.Execute;
         if (not b) then begin
@@ -675,6 +682,7 @@ begin
 
       FSave.SetLog(FLog);
       FSave.SetDataset(mtMensajes);
+      FSave.SetFiltered(aFiltrados);
       FSave.Save(FileSaveDialog.FileName);
 
       // Una vez guardado nos quedamos con el nombre del fichero
@@ -694,7 +702,7 @@ end;
 
 procedure TFormMain.actGuardarcomoExecute(Sender: TObject);
 begin
-  InternalSaveFile(string.Empty);
+  InternalSaveFile(string.Empty, actSoloVisibles.Checked);
   UpdateCaption;
 end;
 
@@ -705,8 +713,44 @@ end;
 
 procedure TFormMain.actGuardarExecute(Sender: TObject);
 begin
-  InternalSaveFile(FSavedFileName);
+  InternalSaveFile(FSavedFileName, actSoloVisibles.Checked);
   UpdateCaption;
+end;
+
+procedure TFormMain.actGuardarProcesoExecute(Sender: TObject);
+begin
+
+  // S�lo se pueden guardar los mensajes de un proceso si hay un registro activo
+  if (not mtMensajes.Active) or (mtMensajes.IsEmpty) then
+    Exit;
+
+  // Guardamos el estado actual del filtro y la posición del registro activo
+  var filtroAnterior := mtMensajes.Filter;
+  var filtradoAnterior := mtMensajes.Filtered;
+  var bm := mtMensajes.GetBookmark;
+  mtMensajes.DisableControls;
+  try
+    // Filtrar sólo los mensajes del mismo proceso que el registro seleccionado
+    var sFiltro := Format('(PROCESSID = %d)', [mtMensajesProcessId.AsInteger]);
+    Log('Filtro (guardar proceso)= ' + sFiltro);
+
+    mtMensajes.Filter := sFiltro;
+    mtMensajes.Filtered := True;
+    try
+      // Mismo comportamiento que actGuardar, pero con el filtro por proceso
+      InternalSaveFile(FSavedFileName, True, mtMensajesProcessId.AsInteger);
+      UpdateCaption;
+    finally
+      // Restaurar el filtro y la posición original
+      mtMensajes.Filter := filtroAnterior;
+      mtMensajes.Filtered := filtradoAnterior;
+      if mtMensajes.BookmarkValid(bm) then
+        mtMensajes.GotoBookmark(bm);
+    end;
+  finally
+    mtMensajes.FreeBookmark(bm);
+    mtMensajes.EnableControls;
+  end;
 end;
 
 procedure TFormMain.actGuardarUpdate(Sender: TObject);
@@ -791,6 +835,7 @@ begin
   end;
 end;
 
+// limpiar TODOS
 procedure TFormMain.actLimpiarExecute(Sender: TObject);
 begin
   // inicializar contadores
@@ -808,6 +853,7 @@ begin
   FilterMessagesByProcesses;
 end;
 
+// limpiar proceso desde el grid
 procedure TFormMain.actLimpiarProcesoGridExecute(Sender: TObject);
 begin
   // Pause
@@ -815,7 +861,9 @@ begin
   try
     // Limpiar datos del proceso
     var procName := mtMensajesNombre.AsString;
-    // (1) Limpiar los mensajes
+    // (1) limpiar los bookmarks de es eproceso
+    LimpiarBookmarksProceso(ProcName);
+    // (2) Limpiar los mensajes
     DoLimpiarProceso(ProcName);
     // restaurar si había filtro activado
     FilterMessagesByProcesses;
@@ -824,6 +872,7 @@ begin
   end;
 end;
 
+// limpiar proceso desde la lista
 procedure TFormMain.actLimpiarProcesoGridUpdate(Sender: TObject);
 begin
   TAction(Sender).Enabled := (not (gsFileLoaded in FGlobalStates)) and (mtMensajes.Active);
@@ -836,7 +885,9 @@ begin
   try
     // Limpiar datos del proceso
     var procName := clbListaProcesos.Items[clbListaProcesos.ItemIndex];
-    // (1) Limpiar los mensajes
+    // (1) limpiar los bookmarks de es eproceso
+    LimpiarBookmarksProceso(ProcName);
+    // (2) Limpiar los mensajes
     DoLimpiarProceso(ProcName);
     // restaurar si había filtro activado
     FilterMessagesByProcesses;
@@ -1512,9 +1563,52 @@ begin
   end;
 end;
 
+procedure TFormMain.LimpiarBookmarksProceso(const aProcessName: string);
+begin
+  if not mtMensajes.Active then begin
+    Log('El dataset de mensajes no está activo');
+    Exit;
+  end;
+
+  var bm := mtMensajes.GetBookmark;
+  var filtro := mtMensajes.Filter;
+  var filtrado := mtMensajes.Filtered;
+  var enBookmark := gsBookmark in FGlobalStates;
+  FGlobalStates := FGlobalStates + [gsBookmark];
+  mtMensajes.DisableControls;
+  try
+    mtMensajes.Filtered := False;
+    for var i := ListaBookmarks.Count - 1 downto 0 do begin
+      var book := TBookmarkDSV(ListaBookmarks.Objects[i]);
+      if not mtMensajes.Locate('ID', book.ID, []) then begin
+        Log(Format('No se ha encontrado el registro del bookmark %d (ID=%d)', [book.Numero, book.ID]));
+        Continue;
+      end;
+      if (mtMensajesNombre.AsString = aProcessName) or
+         (mtMensajesProcessId.AsString = aProcessName) then begin
+        mtMensajes.Edit;
+        mtMensajesBM.Clear;
+        mtMensajes.Post;
+        ListaBookmarks.Delete(i);
+      end;
+    end;
+  finally
+    try
+      mtMensajes.Filter := filtro;
+      mtMensajes.Filtered := filtrado;
+      if mtMensajes.BookmarkValid(bm) then
+        mtMensajes.GotoBookmark(bm);
+    finally
+      mtMensajes.FreeBookmark(bm);
+      if not enBookmark then
+        FGlobalStates := FGlobalStates - [gsBookmark];
+      mtMensajes.EnableControls;
+      UpdateBookMarksList;
+    end;
+  end;
+end;
+
 procedure TFormMain.LimpiarProceso(const aProcessName: string);
-var
-  listaIds:TList<integer>;
 begin
   // No activo
   if (not mtMensajes.Active) then begin
@@ -1522,56 +1616,29 @@ begin
     Exit;
   end;
 
-  listaIds := TList<integer>.Create;
+  var sFiltro:string := '(PROCESSNAME = ' + QuotedStr(aProcessName) + ')';
+  Log(' Filtro=' + sFiltro);
+
+  dbgMensajes.LockDrawing;
+  mtMensajes.DisableControls;
   try
+    mtMensajes.Filter := sFiltro;
+    mtMensajes.Filtered := True; // Activar el filtro
 
-    // Buscar el proceso en la lista
-    var pi:TProcessInfo := ListaProcesos.GetProcessOject(aProcessName);
-    if not Assigned(pi) then begin
-      Log(Format('Error, no se ha encontrado el proceso [%S]', [aProcessName]));
-      Exit;
-    end
-    else begin
-      // obtener la lista de Ids
-      Log('Lista de IDs ------------------------------------');
-      for var i := 0 to (pi.ProcessIdList.Count - 1) do begin
-        Log('   ' + pi.ProcessIdList[i].ToString);
-        listaIds.Add(pi.ProcessIdList[i]);
-      end;
-    end;
-
-    var sFiltro:string := string.Empty;
-    // Habilitar un filtro para encontrar los registros con PROCESSID = 1234
-    for var i := 0 to (listaIds.Count - 1) do begin
-      if (i > 0) then
-        sFiltro := sFiltro + ' AND ';
-      sFiltro := sFiltro + Format('(PROCESSID = %d)', [listaIDs[i]]);
-    end;
-    Log(' Filtro=' + sFiltro);
-
-    dbgMensajes.LockDrawing;
-    mtMensajes.DisableControls;
     try
-      mtMensajes.Filter := sFiltro;
-      mtMensajes.Filtered := True; // Activar el filtro
+      // Si hay registros en la tabla que cumplen con el filtro, eliminarlos
+      mtMensajes.First; // Posicionarse en el primer registro visible según el filtro
+      while not mtMensajes.Eof do
+        mtMensajes.Delete; // Eliminar el registro actual
 
-      try
-        // Si hay registros en la tabla que cumplen con el filtro, eliminarlos
-        mtMensajes.First; // Posicionarse en el primer registro visible según el filtro
-        while not mtMensajes.Eof do
-          mtMensajes.Delete; // Eliminar el registro actual
-
-      finally
-        // Desactivar el filtro y limpiar por si lo necesitas más tarde
-        mtMensajes.Filtered := False;
-        mtMensajes.Filter := '';
-      end;
     finally
-      dbgMensajes.UnlockDrawing;
-      mtMensajes.EnableControls;
+      // Desactivar el filtro y limpiar por si lo necesitas más tarde
+      mtMensajes.Filtered := False;
+      mtMensajes.Filter := '';
     end;
   finally
-    FreeAndNil(listaIds);
+    dbgMensajes.UnlockDrawing;
+    mtMensajes.EnableControls;
   end;
 end;
 

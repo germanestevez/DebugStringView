@@ -1,3 +1,18 @@
+1.5 (Noviembre 2026)
+--------------------------
+* Borrar mensajes para un proceso específico no para todos.
+* Bugs corregidos sobre opciones de Bookmarks 
+* Opcion de nuevo; Limpia todo, vacía el nombre del fichero, borra procesos/Bookmarks 
+* Ampliar el tamaño del mensaje para soportar cadenas más largas
+* Poder borrar todos los mensajes de un proceso; Desde el mensaje o desde el proceso
+* Grabar/recuperar el Idioma de la configuración
+* Guardar y recuperar informacion de los bookmarks de disco
+* Permite filtrar mensajes visibles al guardar
+* Optimizar proceso de guardar mensajes para mayor rapidez
+* Corrección de bugs menores
+* Se ha añadido el ITALIANO a las traducciones disponibles en la aplicación
+
+
 1.4 (febrero 2026)
 --------------------------
 * Gestión de bookmarks
